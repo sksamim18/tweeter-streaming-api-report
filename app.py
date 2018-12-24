@@ -3,7 +3,7 @@ import json
 import threading
 
 import datetime
-import requests
+# import requests
 from urllib import parse
 from collections import defaultdict
 
@@ -22,7 +22,7 @@ MESSAGE = 'DATA FOR TIME SLOT: {} \n\n'
 
 file = open('stopwords.txt', 'r')
 content = file.read()
-pattern = re.compile("<li>[a-zA-Z']+</li>")
+pattern = re.compile("<li>([a-zA-Z']+)</li>")
 
 STOPWORDS = set(pattern.findall(content))
 
@@ -41,8 +41,8 @@ NLTK_WORDS = ['ourselves', 'hers', 'between', 'yourself', 'but', 'again',
               'now', 'under', 'he', 'you', 'herself', 'has', 'just', 'where',
               'too', 'only', 'myself', 'which', 'those', 'i', 'after',
               'few', 'whom', 't', 'being', 'if', 'theirs', 'my', 'against',
-              'a', 'by', 'doing', 'it', 'how', 'further', 'was', 'here', 'than'
-              'https', 'http']
+              'a', 'by', 'doing', 'it', 'how', 'further', 'was', 'here',
+              'than', 'https', 'http']
 
 STOPWORDS.update(NLTK_WORDS)
 
@@ -83,14 +83,18 @@ class GenerateReport(StreamListener):
 
         self.log_report(data)
 
-    def get_cleaned_links(self, links):
-        links_dict = defaultdict()
+    # Parsing extended url is taking alot of time.
+    # def get_cleaned_links(self, links):
+    #     links_dict = defaultdict()
 
-        for link in set(links):
-            res = requests.get(link)
-            links_dict[link] = res.url
+    #     for link in set(links):
+    #         try:
+    #             res = requests.get(link)
+    #             links_dict[link] = res.url
+    #         except:
+    #             links_dict[link] = link
 
-        return links_dict
+    #     return links_dict
 
     def log_report(self, data):
         text_dict = defaultdict(int)
@@ -107,11 +111,11 @@ class GenerateReport(StreamListener):
             except:
                 pass
 
-        cleaned_links = self.get_cleaned_links(data.get('links'))
+        # cleaned_links = self.get_cleaned_links(data.get('links'))
 
         for link in data.get('links'):
             try:
-                link = cleaned_links.get(link)
+                # link = cleaned_links.get(link)
                 url_details = parse.urlparse(link)
                 host = url_details.netloc
                 if host:
@@ -137,7 +141,7 @@ class GenerateReport(StreamListener):
         links_report = [str(domain[0]) + ': ' + str(
             domain[1]) for domain in domains]
         print('UNIQUE LINKS: ')
-        print('\n'.join(cleaned_links.keys()))
+        print('\n'.join(set(data.get('links'))))
         print('\n')
         print('TOP DOMAINS: ')
         print('\t'.join(links_report))
@@ -173,7 +177,7 @@ class GenerateReport(StreamListener):
 
     def on_error(self, status):
         print(status)
-        print('Something definately went wrong')
+        print('Something went wrong')
 
 
 if __name__ == '__main__':
