@@ -6,6 +6,4 @@ Steps to run the program -
 4. Enter the keyword.
 5. The result will start to appear after one minute slot wise.
 
-Best regards
-Sk Samim Rana
 
